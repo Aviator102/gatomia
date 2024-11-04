@@ -30,6 +30,7 @@
 
         async function fetchPageContent(chatId, receivedMessage) {
             try {
+                // Acessa a página especificada
                 const pageResponse = await fetch('https://sonhadorbrasil.free.nf/sonhador/automatico/uploads/gatomia.html');
                 const pageContent = await pageResponse.text();
 
