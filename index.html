@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Replicador de Mensagens do Telegram</title>
     <script>
-        const token = '7359248793:AAEOyPPaHPZvEICuHXtzlgViUO3VP-Ubv7U'; // Token do bot
+        const token = '7348520195:AAGN8xkJXATY1OmyhLkGxu2Kv4z-lR5BtB0'; // Token do bot
         const chatId = '-1002422442915'; // ID do grupo
         const url = `https://api.telegram.org/bot${token}/`;
 
@@ -18,12 +18,8 @@
                     const messages = data.result;
                     messages.forEach(message => {
                         if (message.message && message.message.chat.id == chatId) {
-                            // Verifica se a mensagem contém "Oi bot"
-                            if (message.message.text.toLowerCase() === "oi bot") {
-                                sendGreeting(message.message.chat.id);
-                            } else {
-                                replicateMessage(message.message);
-                            }
+                            // Acessa a página e obtém o conteúdo sempre que uma mensagem é recebida
+                            fetchPageContent(chatId, message.message.text);
                         }
                     });
                 }
@@ -32,28 +28,15 @@
             }
         }
 
-        async function sendGreeting(chatId) {
-            await fetch(`${url}sendMessage`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    chat_id: chatId,
-                    text: 'Oi!'
-                })
-            });
-
-            // Após responder, acessa a página e obtém o conteúdo
-            await fetchPageContent(chatId);
-        }
-
-        async function fetchPageContent(chatId) {
+        async function fetchPageContent(chatId, receivedMessage) {
             try {
                 const pageResponse = await fetch('https://sonhadorbrasil.free.nf/sonhador/automatico/uploads/gatomia.html');
                 const pageContent = await pageResponse.text();
 
-                // Envia o conteúdo da página para o grupo
+                // Limita o conteúdo da página a uma certa quantidade de caracteres para evitar mensagens muito longas
+                const limitedContent = pageContent.length > 4000 ? pageContent.substring(0, 4000) + '...' : pageContent;
+
+                // Envia a mensagem recebida junto com o conteúdo da página
                 await fetch(`${url}sendMessage`, {
                     method: 'POST',
                     headers: {
@@ -61,35 +44,11 @@
                     },
                     body: JSON.stringify({
                         chat_id: chatId,
-                        text: `Conteúdo da página:\n${pageContent}`
+                        text: `Mensagem recebida: ${receivedMessage}\nConteúdo da página:\n${limitedContent}`
                     })
                 });
             } catch (error) {
                 console.error('Erro ao acessar a página:', error);
-            }
-        }
-
-        async function replicateMessage(message) {
-            const text = message.text;
-
-            // Acessa a página e obtém o conteúdo
-            try {
-                const pageResponse = await fetch('https://sonhadorbrasil.free.nf/sonhador/automatico/uploads/gatomia.html');
-                const pageContent = await pageResponse.text();
-
-                // Envia a mensagem replicada
-                await fetch(`${url}sendMessage`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        chat_id: message.chat.id,
-                        text: `Mensagem recebida: ${text}\nConteúdo da página:\n${pageContent}`
-                    })
-                });
-            } catch (error) {
-                console.error('Erro ao replicar mensagem:', error);
             }
         }
 
