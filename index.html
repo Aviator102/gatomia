@@ -23,7 +23,7 @@
                     messages.forEach(message => {
                         if (message.message && message.message.chat.id == chatId) {
                             // Acessa a página e obtém o conteúdo sempre que uma mensagem é recebida
-                            fetchPageContent(chatId, message.message.text);
+                            fetchPageContent(message.message.text);
                         }
                     });
                 }
@@ -34,16 +34,28 @@
             }
         }
 
-        async function fetchPageContent(chatId, receivedMessage) {
+        async function fetchPageContent(receivedMessage) {
             try {
                 // Acessa a página especificada
                 const pageResponse = await fetch('https://sonhadorbrasil.free.nf/sonhador/automatico/uploads/gatomia.html');
                 const pageContent = await pageResponse.text();
 
-                // Limita o conteúdo da página a uma certa quantidade de caracteres para evitar mensagens muito longas
-                const limitedContent = pageContent.length > 4000 ? pageContent.substring(0, 4000) + '...' : pageContent;
+                // Cria um elemento DOM para analisar o conteúdo HTML
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(pageContent, 'text/html');
 
-                // Envia a mensagem recebida junto com o conteúdo da página
+                // Extraia o conteúdo que você deseja interagir; por exemplo, todas as divs
+                const divs = doc.querySelectorAll('div'); // Seleciona todas as divs
+                let contentToSend = '';
+
+                divs.forEach(div => {
+                    contentToSend += div.innerText + '\n'; // Coleta o texto de cada div
+                });
+
+                // Limita o conteúdo da página a uma certa quantidade de caracteres para evitar mensagens muito longas
+                const limitedContent = contentToSend.length > 4000 ? contentToSend.substring(0, 4000) + '...' : contentToSend;
+
+                // Envia a mensagem recebida junto com o conteúdo das divs
                 await fetch(`${url}sendMessage`, {
                     method: 'POST',
                     headers: {
@@ -73,4 +85,3 @@
     <p>O bot está em funcionamento. Mensagens serão replicadas no grupo.</p>
 </body>
 </html>
-
