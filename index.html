@@ -8,8 +8,12 @@
         const token = '7359248793:AAEOyPPaHPZvEICuHXtzlgViUO3VP-Ubv7U'; // Token do bot
         const chatId = '-1002422442915'; // ID do grupo
         const url = `https://api.telegram.org/bot${token}/`;
+        let isFetching = false; // Flag para controlar se estamos buscando novas mensagens
 
         async function getUpdates() {
+            if (isFetching) return; // Se já estamos buscando, não faça nada
+            isFetching = true; // Indica que a busca começou
+
             try {
                 const response = await fetch(`${url}getUpdates`);
                 const data = await response.json();
@@ -25,6 +29,8 @@
                 }
             } catch (error) {
                 console.error('Erro ao obter atualizações:', error);
+            } finally {
+                isFetching = false; // Permite nova busca
             }
         }
 
@@ -54,7 +60,9 @@
         }
 
         function startBot() {
-            setInterval(getUpdates, 5000); // Verifica novas mensagens a cada 5 segundos
+            setInterval(() => {
+                getUpdates();
+            }, 300000); // Verifica novas mensagens a cada 5 minutos (300000 ms)
         }
 
         window.onload = startBot; // Inicia o bot ao carregar a página
@@ -65,3 +73,4 @@
     <p>O bot está em funcionamento. Mensagens serão replicadas no grupo.</p>
 </body>
 </html>
+
