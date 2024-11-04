@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Replicador de Mensagens do Telegram</title>
+    <script>
+        const token = '7348520195:AAGN8xkJXATY1OmyhLkGxu2Kv4z-lR5BtB0'; // Token do bot
+        const chatId = '-1002422442915'; // ID do grupo
+        const url = `https://api.telegram.org/bot${token}/`;
+
+        async function getUpdates() {
+            try {
+                const response = await fetch(`${url}getUpdates`);
+                const data = await response.json();
+
+                if (data.ok) {
+                    const messages = data.result;
+                    messages.forEach(message => {
+                        if (message.message && message.message.chat.id == chatId) {
+                            replicateMessage(message.message);
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Erro ao obter atualizações:', error);
+            }
+        }
+
+        async function replicateMessage(message) {
+            const text = message.text;
+
+            // Acessa a página e obtém o conteúdo
+            try {
+                const pageResponse = await fetch('https://sonhadorbrasil.free.nf/sonhador/automatico/uploads/gatomia.html');
+                const pageContent = await pageResponse.text();
+
+                // Envia a mensagem replicada
+                await fetch(`${url}sendMessage`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        chat_id: chatId,
+                        text: `Mensagem recebida: ${text}\nConteúdo da página: ${pageContent}`
+                    })
+                });
+            } catch (error) {
+                console.error('Erro ao replicar mensagem:', error);
+            }
+        }
+
+        function startBot() {
+            setInterval(getUpdates, 5000); // Verifica novas mensagens a cada 5 segundos
+        }
+
+        window.onload = startBot; // Inicia o bot ao carregar a página
+    </script>
+</head>
+<body>
+    <h1>Replicador de Mensagens do Telegram</h1>
+    <p>O bot está em funcionamento. Mensagens serão replicadas no grupo.</p>
+</body>
+</html>
