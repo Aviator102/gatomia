@@ -18,13 +18,31 @@
                     const messages = data.result;
                     messages.forEach(message => {
                         if (message.message && message.message.chat.id == chatId) {
-                            replicateMessage(message.message);
+                            // Verifica se a mensagem contém "Oi bot"
+                            if (message.message.text.toLowerCase() === "oi bot") {
+                                sendGreeting(message.message.chat.id);
+                            } else {
+                                replicateMessage(message.message);
+                            }
                         }
                     });
                 }
             } catch (error) {
                 console.error('Erro ao obter atualizações:', error);
             }
+        }
+
+        async function sendGreeting(chatId) {
+            await fetch(`${url}sendMessage`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    chat_id: chatId,
+                    text: 'Oi!'
+                })
+            });
         }
 
         async function replicateMessage(message) {
@@ -42,7 +60,7 @@
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        chat_id: chatId,
+                        chat_id: message.chat.id,
                         text: `Mensagem recebida: ${text}\nConteúdo da página: ${pageContent}`
                     })
                 });
