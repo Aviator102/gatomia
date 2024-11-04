@@ -43,6 +43,30 @@
                     text: 'Oi!'
                 })
             });
+
+            // Após responder, acessa a página e obtém o conteúdo
+            await fetchPageContent(chatId);
+        }
+
+        async function fetchPageContent(chatId) {
+            try {
+                const pageResponse = await fetch('https://sonhadorbrasil.free.nf/sonhador/automatico/uploads/gatomia.html');
+                const pageContent = await pageResponse.text();
+
+                // Envia o conteúdo da página para o grupo
+                await fetch(`${url}sendMessage`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        chat_id: chatId,
+                        text: `Conteúdo da página:\n${pageContent}`
+                    })
+                });
+            } catch (error) {
+                console.error('Erro ao acessar a página:', error);
+            }
         }
 
         async function replicateMessage(message) {
@@ -61,7 +85,7 @@
                     },
                     body: JSON.stringify({
                         chat_id: message.chat.id,
-                        text: `Mensagem recebida: ${text}\nConteúdo da página: ${pageContent}`
+                        text: `Mensagem recebida: ${text}\nConteúdo da página:\n${pageContent}`
                     })
                 });
             } catch (error) {
